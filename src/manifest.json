@@ -22,6 +22,9 @@
     "notifications",
     "offscreen"
   ],
+  "chrome_url_overrides": {
+    "newtab": "src/newtab.html"
+  },
   "offline_enabled": true,
   "background": {
     "service_worker": "src/background.ts"

@@ -90,3 +90,40 @@ Browser.runtime.onMessage.addListener(async message => {
     repo.initAsync();
   }
 });
+
+Browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  console.log("***** change!", changeInfo, tab.url)
+  if (changeInfo.status === 'complete' && tab.url?.startsWith('chrome://newtab/')) {
+    console.log('New tab page detected, injecting scripts');
+
+    try {
+      console.log('Executing content scripts...');
+      await Browser.scripting.executeScript({
+        target: { tabId },
+        files: ['src/content-scripts/overlay.js', 'src/newtab.js']
+      });
+      console.log('Content scripts executed successfully');
+
+      console.log('Inserting CSS...');
+      await Browser.scripting.insertCSS({
+        target: { tabId },
+        files: [
+          'assets/css/dark.css',
+          'assets/css/main.css',
+          'assets/css/general.css'
+        ]
+      });
+      console.log('CSS inserted successfully');
+    } catch (err) {
+      console.error('Failed to inject scripts:', err);
+      // Log more detailed error information
+      if (err instanceof Error) {
+        console.error('Error details:', {
+          message: err.message,
+          stack: err.stack,
+          name: err.name
+        });
+      }
+    }
+  }
+});
